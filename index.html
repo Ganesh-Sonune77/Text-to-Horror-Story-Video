@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text to Horror Video</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 40px; }
+        textarea, select, button { width: 60%; margin-bottom: 20px; font-size: 16px; }
+        #statusText { font-style: italic; margin-top: 10px; }
+        video { width: 80%; border: 1px solid #333; margin-top: 20px; display: none; }
+    </style>
+</head>
+<body>
+    <h2>🎃 Generate Horror Video from Text</h2>
+
+    <label>Enter your horror story prompt:</label><br>
+    <textarea id="prompt" rows="6" required></textarea><br>
+
+    <label>Select Voice Language:</label><br>
+    <select id="language">
+        <option value="hindi">Hindi</option>
+        <option value="english">English</option>
+    </select><br>
+
+    <label>Aspect Ratio:</label><br>
+    <select id="ratio">
+        <option value="16:9">16:9 (YouTube Standard)</option>
+        <option value="9:16">9:16 (YouTube Shorts / Reels)</option>
+        <option value="1:1">1:1 (Square Video)</option>
+    </select><br>
+
+    <button id="generateBtn">🎬 Generate Video</button>
+    <p id="statusText"></p>
+    <video id="horrorVideo" controls></video>
+
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const prompt = document.getElementById('prompt').value;
+            const language = document.getElementById('language').value;
+            const ratio = document.getElementById('ratio').value;
+            const status = document.getElementById('statusText');
+            const videoPlayer = document.getElementById('horrorVideo');
+
+            if (!prompt.trim()) {
+                status.innerText = "⚠️ Please enter a story prompt.";
+                return;
+            }
+
+            status.innerText = "👻 Haunting your story... Creating chills...";
+            videoPlayer.style.display = "none";
+
+            try {
+                const res = await fetch('/generate_video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, language, ratio })
+                });
+
+                const data = await res.json();
+
+                if (data.video_url) {
+                    videoPlayer.src = data.video_url;
+                    videoPlayer.style.display = "block";
+                    status.innerText = "✅ Horror video ready. Beware!";
+                } else {
+                    status.innerText = "⚠️ Couldn't generate video. Try again?";
+                }
+
+            } catch (error) {
+                status.innerText = "💥 Something spooky went wrong!";
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
